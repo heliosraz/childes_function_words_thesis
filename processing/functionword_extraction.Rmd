@@ -20,7 +20,7 @@ We use the package `r childesr` to access the data in the CHILDES database. The 
 #Getting data from 1270 children in 73 corpora...
 all_english_tokens <- get_tokens(collection = c("Eng-NA","Eng-UK"), 
                           role = c("target_child","Mother", "Father"),
-                          token = "*", n=Inf)
+                          token = "*")
 
 #Import all English utterances from CHILDES 
 eng_utterances <- get_utterances(collection = c("Eng-NA","Eng-UK"), 
