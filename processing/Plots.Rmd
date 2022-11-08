@@ -43,26 +43,25 @@ Different function words imply different logical and language development. devel
 
 ```{r}
 counts_chi_tokens<-count(chi_english_tokens,word)%>%filter(word!="other")
-counts_chi_tokens$n<-round(((counts_chi_tokens$n)/sum(counts_chi_tokens$n)),digits=7)
+counts_chi_tokens$n<-round(((counts_chi_tokens$n)/sum(counts_chi_tokens$n)),digits=5)
 counts_chi_tokens<-counts_chi_tokens[order(counts_chi_tokens$n,decreasing=TRUE),]
 counts_chi_tokens<-counts_chi_tokens[(0:20),]
+counts_chi_tokens$speaker_role<-"Children"
 
-ggplot(data=counts_chi_tokens, aes(x=reorder(word,n), y=n)) +
-  geom_bar(stat="identity")+
-  geom_text(aes(label=n), vjust=-0.3, size=3.5)+
-  theme_minimal()+ coord_flip()+labs(title="Children Token Frequencies", 
-         x="Frequencies", y = "Tokens")
-
-counts_parent_tokens<-count(parent_english_tokens,word)
-counts_parent_tokens$n<-round(((counts_parent_tokens$n)/length(parent_english_tokens$word)),digits=7)
-counts_parent_tokens<-counts_parent_tokens[order(counts_parent_tokens$n,decreasing=TRUE),]
+counts_parent_tokens<-count(parent_english_tokens,word)%>%filter(word!="other")
+counts_parent_tokens$n<-round(((counts_parent_tokens$n)/length(parent_english_tokens$word)),digits=5)
+counts_parent_tokens<-counts_parent_tokens[match(counts_chi_tokens$word,counts_parent_tokens$word),]
 counts_parent_tokens<-counts_parent_tokens[(0:20),]
+counts_parent_tokens$speaker_role<-"Parent"
 
-ggplot(data=counts_parent_tokens, aes(x=reorder(word,n), y=n)) +
-  geom_bar(stat="identity")+
-  geom_text(aes(label=n), vjust=-0.3, size=3.5)+
-  theme_minimal()+ coord_flip()+labs(title="Parents Token Frequencies", 
-         x="Frequencies", y = "Tokens")
+
+combined_totals<-rbind(counts_chi_tokens,counts_parent_tokens)
+
+ggplot(data=combined_totals, aes(x=reorder(word,n), y=n, fill=speaker_role)) +
+  geom_bar(stat="identity", position="dodge",width=0.4)+
+  geom_text(aes(label=n), hjust=-0.3, size=2)+
+  theme_minimal()+labs(title="Token Frequencies", 
+         x="Frequencies", y = "Tokens")+ coord_flip()
 
 ```
 
