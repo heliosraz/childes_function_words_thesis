@@ -25,12 +25,11 @@ english_tokens <- read_feather(path = '../raw_data/english_tokens.feather')
 processed_tokens <-read_feather(path='../processed_data/english_tokens_processed.feather')
 ```
 
-To make data analysis easier, I isolated the child and parent utterances based on their role: speaker.
+Since to To make data analysis easier, I isolated the child and parent utterances based on their role: speaker.
 ```{r isolate children and parents}
 chi_english_tokens<-processed_tokens%>%filter(speaker=="child")
 parent_english_tokens<-processed_tokens%>%filter(speaker=="parent")
 ```
-
 
 First are some plots based on the general population. The children population (n=919) has a 
 ```{r}
@@ -41,27 +40,91 @@ hist(uniques_chi$age,xlab = "Children Ages (months)",)
 Now, we want to normalize to the number of words the each person uses per sentence since it would follow that parents would use talk more within an interaction.
 Different function words imply different logical and language development. development. By comparing each child's function word category distribution to their parents a model may be able to be formulated to predict 
 
-```{r}
-counts_chi_tokens<-count(chi_english_tokens,word)%>%filter(word!="other")
-counts_chi_tokens$n<-round(((counts_chi_tokens$n)/sum(counts_chi_tokens$n)),digits=5)
+```{r children plots}
+#children only plots
+counts_chi_tokens<-count(chi_english_tokens,word,sort=TRUE)%>%filter(word!="other")
+counts_chi_tokens$rf<-round(((counts_chi_tokens$n)/length(chi_english_tokens$word)),digits=5)
+counts_chi_tokens$logf<-round(log(counts_chi_tokens$n),digits=5)
 counts_chi_tokens<-counts_chi_tokens[order(counts_chi_tokens$n,decreasing=TRUE),]
-counts_chi_tokens<-counts_chi_tokens[(0:20),]
+# counts_chi_tokens<-counts_chi_tokens[(0:20),]
 counts_chi_tokens$speaker_role<-"Children"
 
-counts_parent_tokens<-count(parent_english_tokens,word)%>%filter(word!="other")
-counts_parent_tokens$n<-round(((counts_parent_tokens$n)/length(parent_english_tokens$word)),digits=5)
+#raw frequency plot
+ggplot(data=counts_chi_tokens, aes(x=rank(reorder(word,n,decreasing=TRUE)), y=n)) +
+  geom_point(stat="identity",color='#F8766D')+
+  theme_minimal()+labs(title="Children Token Raw Frequencies", 
+         x="Frequency Rank", y = " Raw Frequency")+geom_smooth(color='#F8766D')
+
+#relative frequency plot
+ggplot(data=counts_chi_tokens, aes(x=rank(reorder(word,n,decreasing=TRUE)), y=rf)) +
+  geom_point(stat="identity",color='#F8766D')+
+  theme_minimal()+labs(title="Children Token Relative Frequencies", 
+         x="Frequency Rank", y = "Frequency")+geom_smooth(color='#F8766D')
+
+#log frequency plot
+ggplot(data=counts_chi_tokens, aes(x=rank(reorder(word,n,decreasing=TRUE)), y=logf)) +
+  geom_point(stat="identity",color='#F8766D')+
+  theme_minimal()+labs(title="Children Token Log Frequencies", 
+         x="Frequency Rank", y = "Frequency")+geom_smooth(color='#F8766D')
+```
+
+
+```{r parent plots}
+#parent only plot
+counts_parent_tokens<-count(parent_english_tokens,word,sort=TRUE)%>%filter(word!="other")
+counts_parent_tokens$rf<-round(((counts_parent_tokens$n)/length(parent_english_tokens$word)),digits=5)
+counts_parent_tokens$logf<-round(log(counts_parent_tokens$n),digits=5)
 counts_parent_tokens<-counts_parent_tokens[match(counts_chi_tokens$word,counts_parent_tokens$word),]
-counts_parent_tokens<-counts_parent_tokens[(0:20),]
+# counts_parent_tokens<-counts_parent_tokens[(0:20),]
 counts_parent_tokens$speaker_role<-"Parent"
 
+#raw frequency plot
+ggplot(data=counts_parent_tokens, aes(x=rank(reorder(word,n,decreasing=TRUE)), y=n)) +
+  geom_point(stat="identity",color='#00BFC4')+
+  theme_minimal()+labs(title="Parent Token Raw Frequencies", 
+         x="Frequency Rank", y = " Raw Frequency")+geom_smooth(color='#00BFC4')
 
-combined_totals<-rbind(counts_chi_tokens,counts_parent_tokens)
+#relative frequency plot
+ggplot(data=counts_parent_tokens, aes(x=rank(reorder(word,n,decreasing=TRUE)), y=rf)) +
+  geom_point(stat="identity",color='#00BFC4')+
+  theme_minimal()+labs(title="Parent Token Relative Frequencies", 
+         x="Frequency Rank", y = "Frequency")+geom_smooth(color='#00BFC4')
 
-ggplot(data=combined_totals, aes(x=reorder(word,n), y=n, fill=speaker_role)) +
-  geom_bar(stat="identity", position="dodge",width=0.4)+
-  geom_text(aes(label=n), hjust=-0.3, size=2)+
-  theme_minimal()+labs(title="Token Frequencies", 
-         x="Frequencies", y = "Tokens")+ coord_flip()
+#log frequency plot
+ggplot(data=counts_parent_tokens, aes(x=rank(reorder(word,n,decreasing=TRUE)), y=logf)) +
+  geom_point(stat="identity",color='#00BFC4')+
+  theme_minimal()+labs(title="Parent Token Log Frequencies", 
+         x="Frequency Rank", y = "Frequency")+geom_smooth(color='#00BFC4')
+```
+
+
+```{r combined plots}
+#combined plot
+counts_combined<-processed_tokens%>%group_by(speaker)%>%count(word,sort=TRUE)%>%filter(word!="other")
+counts_combined<-counts_combined%>%mutate(rf=round(n/sum(n),digits=5),.by=speaker)%>%subset(select=-c(.by))
+counts_combined$logf<-round(log(counts_combined$n),digits=5)
+# counts_combined<-counts_combined[order(counts_combined$n,decreasing=TRUE),]
+
+#raw frequency plot
+ggplot(data=counts_combined, aes(x=rank(reorder(word,n,decreasing=TRUE)), y=n, color=speaker)) +
+  geom_point(stat="identity")+
+  theme_minimal()+labs(title="Parent Token Raw Frequencies", 
+         x="Frequency Rank", y = " Raw Frequency")+geom_smooth()+
+  scale_color_manual(values=c("#F8766D","#00BFC4"))
+
+#relative frequency plot
+ggplot(data=counts_combined, aes(x=rank(reorder(word,n,decreasing=TRUE)), y=rf, color=speaker)) +
+  geom_point(stat="identity")+
+  theme_minimal()+labs(title="Parent Token Relative Frequencies", 
+         x="Frequency Rank", y = "Frequency")+geom_smooth()+
+  scale_color_manual(values=c("#F8766D","#00BFC4"))
+
+#log frequency plot
+ggplot(data=counts_combined, aes(x=rank(reorder(word,n,decreasing=TRUE)), y=logf, color=speaker)) +
+  geom_point(stat="identity")+
+  theme_minimal()+labs(title="Parent Token Log Frequencies", 
+         x="Frequency Rank", y = "Frequency")+geom_smooth(method="lm")+
+  scale_color_manual(values=c("#F8766D","#00BFC4"))
 
 ```
 
