@@ -14,7 +14,7 @@ library(feather)
 
 # Loading Data from Childes-DB
 
-We use the package `r childesr` to access the data in the CHILDES database. The code below downloades and stores all utterances by children and parents. Utterances are annotated for the type of sentence (declarative, interrogative, imperative).
+We use the package `r childesr` to access the data in the CHILDES database. The code below downloads and stores all utterances by children and parents. Utterances are annotated for the type of sentence (declarative, interrogative, imperative).
 
 ```{r ChildesDBimports}
 #Getting data from 1270 children in 73 corpora...
@@ -146,6 +146,7 @@ english_tokens$utterance_type <-
          `trail off` = "other",
          `trail off question` = "interrogative"
          )
+
 ```
 
 ## Coding for function words
@@ -159,7 +160,7 @@ english_tokens$gloss <- english_tokens$gloss %>% tolower()
 Then we create a word column that marks all words as "other". Then we mark the function words of interest.
 
 ```{r NegationWords}
-english_tokens$word <- "other"
+english_tokens$word <- "Other"
 
 function_words <- c("no", "not", "cannot", "ain't", "isn't", "amn't", "aren't", "wasn't", "weren't", "don't", "doesn't", "didn't", "won't", "shan't", "hasn't", "haven't", "hadn't", "shouldn't", "can't", "couldn't", "mayn't", "mightn't", "wouldn't", "mustn't", "and", "or", "if", "nor", "therefore", "none", "some", "each", "every", "all", "most", "few", "many", "several", "few", "both", "everyone", "someone", "somebody", "everybody", "nonone", "everything", "something", "nowhere", "somewhere", "everywhere", "more", "less", "much", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "nineth", "tenth", "last", "can", "could", "need", "may", "might", "should", "ought", "must", "maybe", "perhaps", "shall", "any", "anyone", "anything", "anywhere", "anything", "anyway", "anyways", "ever", "yet", "the", "a", "an", "this", "that", "these", "those", "always", "usually", "seldom", "never", "sometimes", "often", "once", "twice", "when", "while", "after", "before", "then", "until", "since", "whenever", "during", "who", "when", "what", "whose", "where", "how", "why", "whom", "on", "in", "out", "up", "down", "under", "above", "below", "along", "over", "behind", "across", "beside", "between", "beyond", "inside", "outside", "into", "near", "onto", "toward", "because", "therefore", "but", "although", "again", "too", "also", "another", "other", "others", "still", "even", "only", "indeed", "either", "neither", "whether", "as", "else", "almost", "already", "except", "for", "from", "instead", "same", "different", "such", "with", "without", "about", "by", "very", "unless")
 
@@ -178,7 +179,7 @@ Next we need to create the categories of function words we are interested in:
 * Numerals: 1. numbers: one, two, three, four, five, six, seven, eight, nine, ten 2. ordinals: first, second, third, fourth fifth, last
 * Modals: can, could, need, may, might, should, ought, must, maybe, perhaps, shall
 * Negative Polarity Items: any, anyone, anything, anyhow, anywhere, anything, anyway, ever, yet
-* Definiteness and Demonstratives: 1. Definites: the, a, an 2. Demonstratives: this, that, these, those
+* Definiteness and Demonstratives: 1. Definite: the, a, an 2. Demonstratives: this, that, these, those
 * Temporals: 1. Quantifiers: always, usually, seldom, never, sometimes, now, often, once 2. Connectives: when, while, after, before, then, until, since, whenever, during
 * Interrogatives: who, when, what, whose, where, how, why, whom
 * Locatives: on, in, out, up, down, under, above, below, along, over, behind, across, beside, between, beyond, inside, outside, into, near, onto, toward
@@ -191,7 +192,7 @@ Next we need to create the categories of function words we are interested in:
 First we start with marking content words and selecting logical connectives:
 
 ```{r}
-english_tokens$functionword_category <- "content"
+english_tokens$functionword_category <- "Content"
 
 logical_connectives <- c("no", "not", "cannot", "ain't", "isn't", "amn't", "aren't", "wasn't", "weren't", "don't", "doesn't", "didn't", "won't", "shan't", "hasn't", "haven't", "hadn't", "shouldn't", "can't", "couldn't", "mayn't", "mightn't", "wouldn't", "mustn't", "and", "or", "if", "nor", "therefore") 
 
@@ -303,10 +304,10 @@ for (x in temporal_connectives){
 Interrogatives:
 
 ```{r}
-temporal_connectives <- c("who", "when", "what", "whose", "where", "how", "why", "whom") 
+interrogatives <- c("who", "when", "what", "whose", "where", "how", "why", "whom") 
 
-for (x in temporal_connectives){
-  english_tokens$functionword_category[english_tokens$gloss==x] <- "Temporal Connectives"
+for (x in interrogatives){
+  english_tokens$functionword_category[english_tokens$gloss==x] <- "Interrogatives"
 }
 ```
 
@@ -321,7 +322,6 @@ for (x in locatives){
 ```
 
 Causal Connectives:
-
 ```{r}
 causatives <- c("because") 
 
@@ -369,6 +369,7 @@ for (x in other){
   english_tokens$functionword_category[english_tokens$gloss==x] <- "Other"
 }
 ```
+
 
 ## Saving Summary Tables
 
